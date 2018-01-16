@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
-from rdbtools import RdbParser, JSONCallback, DiffCallback, MemoryCallback, ProtocolCallback, PrintAllKeys, KeysOnlyCallback, KeyValsOnlyCallback
+from rdbtools import RdbParser, JSONCallback, DiffCallback, MemoryCallback, ProtocolCallback, PrintAllKeys, KeysOnlyCallback, KeyValsOnlyCallback, PrintOnlyNoExprKeys
 from rdbtools.encodehelpers import ESCAPE_CHOICES
 from rdbtools.parser import HAS_PYTHON_LZF as PYTHON_LZF_INSTALLED
 
@@ -20,7 +20,7 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
 
     parser = OptionParser(usage=usage)
     parser.add_option("-c", "--command", dest="command",
-                  help="Command to execute. Valid commands are json, diff, justkeys, justkeyvals, memory and protocol", metavar="FILE")
+                  help="Command to execute. Valid commands are json, diff, justkeys, justkeyvals, memory, memory_noexpr and protocol", metavar="FILE")
     parser.add_option("-f", "--file", dest="output",
                   help="Output file", metavar="FILE")
     parser.add_option("-n", "--db", dest="dbs", action="append",
@@ -83,6 +83,8 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
                 'justkeys': lambda f: KeysOnlyCallback(f, string_escape=options.escape),
                 'justkeyvals': lambda f: KeyValsOnlyCallback(f, string_escape=options.escape),
                 'memory': lambda f: MemoryCallback(PrintAllKeys(f, options.bytes, options.largest),
+                                                   64, string_escape=options.escape),
+                'memory_noexpr': lambda f: MemoryCallback(PrintOnlyNoExprKeys(f, options.bytes, options.largest),
                                                    64, string_escape=options.escape),
                 'protocol': lambda f: ProtocolCallback(f, string_escape=options.escape)
             }[options.command](out_file_obj)
