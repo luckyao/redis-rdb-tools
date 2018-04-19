@@ -90,7 +90,7 @@ class PrintAllKeys(object):
         if self._largest is not None:
             self._heap = []
     
-    def next_record(self, record) :
+    def next_record(self, record):
         if record.key is None:
             return  # some records are not keys (e.g. dict)
         if self._largest is None:
@@ -111,6 +111,26 @@ class PrintAllKeys(object):
             while self._heap:
                 bytes, record = heappop(self._heap)
                 self.next_record(record)
+
+
+class PrintOnlyNoExprKeys(PrintAllKeys):
+    def __init__(self, out, bytes, largest):
+        super(PrintOnlyNoExprKeys, self).__init__(out, bytes, largest)
+
+    def next_record(self, record):
+        if record.key is None:
+            return  # some records are not keys (e.g. dict)
+        if self._largest is None:
+            if self._bytes is None or record.bytes >= int(self._bytes):
+                if not record.expiry:
+                    rec_str = "%d,%s,%s,%d,%s,%d,%d,%s\n" % (
+                        record.database, record.type, record.key, record.bytes, record.encoding, record.size,
+                        record.len_largest_element,
+                        record.expiry.isoformat() if record.expiry else '')
+                    self._out.write(codecs.encode(rec_str, 'latin-1'))
+        else:
+            heappush(self._heap, (record.bytes, record))
+
 
 class PrintJustKeys(object):
     def __init__(self, out):
