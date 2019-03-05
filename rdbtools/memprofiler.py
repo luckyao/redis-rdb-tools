@@ -126,7 +126,7 @@ class PrintOnlyNoExprKeys(PrintAllKeys):
                     rec_str = "%d,%s,%s,%d,%s,%d,%d,%s\n" % (
                         record.database, record.type, record.key, record.bytes, record.encoding, record.size,
                         record.len_largest_element,
-                        record.expiry.isoformat() if record.expiry else '')
+                        record.expiry.isoformat() if record.expiry else '-1')
                     self._out.write(codecs.encode(rec_str, 'latin-1'))
         else:
             heappush(self._heap, (record.bytes, record))
